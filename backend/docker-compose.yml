@@ -1,0 +1,16 @@
+services:
+  postgis:
+    image: postgis/postgis:16-3.4
+    container_name: drishti-postgis
+    environment:
+      POSTGRES_DB: drishti_geoai
+      POSTGRES_USER: drishti
+      POSTGRES_PASSWORD: drishti
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgis-data:/var/lib/postgresql/data
+      - ./app/migrations/001_postgis_schema.sql:/docker-entrypoint-initdb.d/001_postgis_schema.sql:ro
+
+volumes:
+  postgis-data:
