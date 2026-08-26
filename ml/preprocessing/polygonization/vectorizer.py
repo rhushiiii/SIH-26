@@ -71,6 +71,13 @@ class FeatureVectorizer:
         meters_per_deg_lat = 111320.0
         meters_per_deg_lon = 111320.0 * math.cos(math.radians(origin_lat))
 
+        # Minimum area filters (in m^2) to reject 1-pixel artifacts & noise
+        min_area_by_type = {
+            FeatureType.BUILDING: 5.0,     # min 5 m^2 for real building footprints
+            FeatureType.ROAD: 10.0,        # min 10 m^2 for road segments
+            FeatureType.WATERBODY: 15.0,   # min 15 m^2 for water bodies
+        }
+
         for class_id, feature_type in class_to_type.items():
             binary_mask = (mask == class_id).astype(np.uint8)
             if not np.any(binary_mask):
@@ -93,6 +100,10 @@ class FeatureVectorizer:
                 if is_pixel_affine:
                     area_m2 = float(poly.area * self.pixel_area_m2)
                     perimeter_m = float(poly.length * self.resolution_m)
+                    # Skip tiny 1-pixel noise artifacts
+                    if area_m2 < min_area_by_type.get(feature_type, 5.0):
+                        continue
+
                     # Convert pixel polygon to geographic coordinates around reference origin
                     wgs84_poly = shapely_transform(
                         lambda x, y: (
@@ -104,6 +115,10 @@ class FeatureVectorizer:
                 else:
                     area_m2 = float(poly.area)
                     perimeter_m = float(poly.length)
+                    # Skip tiny 1-pixel noise artifacts
+                    if area_m2 < min_area_by_type.get(feature_type, 5.0):
+                        continue
+
                     if transformer is not None:
                         try:
                             wgs84_poly = shapely_transform(transformer.transform, poly)
@@ -114,6 +129,13 @@ class FeatureVectorizer:
 
                 if wgs84_poly.is_empty:
                     continue
+
+                # Simplify polygon boundaries slightly to reduce jagged pixel edges
+                try:
+                    wgs84_poly = wgs84_poly.simplify(tolerance=0.000015, preserve_topology=True)
+                except Exception:
+                    pass
+
 
                 feature_counter += 1
                 feature_id = f"feat_{seg_contract.tile_id}_{class_id}_{feature_counter}"
