@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-navy: #071a33;
+  --color-navy-800: #0b2748;
+  --color-navy-700: #12325c;
+  --color-indigo: #4338ca;
+  --color-indigo-600: #4f46e5;
+  --color-blue: #2563eb;
+  --color-building: #f59e0b;
+  --color-road: #f97316;
+  --color-water: #06b6d4;
+  --color-confidence-high: #10b981;
+  --color-confidence-medium: #f59e0b;
+  --color-confidence-low: #ef4444;
+
+  --color-background: #f8fafc;
+  --color-foreground: #0f172a;
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-primary: #4338ca;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #eef2ff;
+  --color-secondary-foreground: #1e1b4b;
+  --color-accent: #2563eb;
+  --color-accent-foreground: #ffffff;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-ring: #2563eb;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0f172a;
+  --color-sidebar: #071a33;
+  --color-sidebar-foreground: #e2e8f0;
+  --color-sidebar-muted: #94a3b8;
+  --color-sidebar-accent: #12325c;
+  --color-sidebar-border: #1e3a5f;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+
+  --shadow-border:
+    0px 0px 0px 1px rgba(15, 23, 42, 0.06),
+    0px 1px 2px -1px rgba(15, 23, 42, 0.06),
+    0px 2px 4px 0px rgba(15, 23, 42, 0.04);
+  --shadow-border-hover:
+    0px 0px 0px 1px rgba(15, 23, 42, 0.08),
+    0px 1px 2px -1px rgba(15, 23, 42, 0.08),
+    0px 2px 4px 0px rgba(15, 23, 42, 0.06);
+
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  * {
+    border-color: var(--color-border);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: #d7e0ea;
+}
+
+.leaflet-control-attribution {
+  font-size: 10px;
+  background: color-mix(in oklab, white 88%, transparent);
+}
+
+.drishti-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
