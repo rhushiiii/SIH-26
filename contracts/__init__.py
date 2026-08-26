@@ -1,0 +1,34 @@
+from enum import Enum
+
+
+class FeatureType(str, Enum):
+    BUILDING = "BUILDING"
+    ROAD = "ROAD"
+    WATERBODY = "WATERBODY"
+
+
+class ConfidenceLevel(str, Enum):
+    HIGH = "HIGH"
+    MEDIUM = "MEDIUM"
+    LOW = "LOW"
+
+
+class FeatureStatus(str, Enum):
+    AUTO_ACCEPTED = "AUTO_ACCEPTED"
+    REVIEW_RECOMMENDED = "REVIEW_RECOMMENDED"
+    HUMAN_REVIEW_REQUIRED = "HUMAN_REVIEW_REQUIRED"
+    ACCEPTED = "ACCEPTED"
+    REJECTED = "REJECTED"
+    EDITED = "EDITED"
+
+
+class JobStatus(str, Enum):
+    QUEUED = "QUEUED"
+    VALIDATING = "VALIDATING"
+    PREPROCESSING = "PREPROCESSING"
+    INFERENCE = "INFERENCE"
+    POSTPROCESSING = "POSTPROCESSING"
+    FINALIZING = "FINALIZING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    CANCELLED = "CANCELLED"

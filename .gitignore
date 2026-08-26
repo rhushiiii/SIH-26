@@ -1,7 +1,23 @@
+# Environment & Python
 .env
 __pycache__/
 *.py[cod]
 .pytest_cache/
+*.egg-info/
+.venv/
+venv/
+
+# Node & Frontend
+node_modules/
+dist/
+
+# Backend runtime data
 backend/data/*.db
 backend/data/images/img_*/
 backend/data/exports/*
+
+# ML dataset & local weights/data
+/data
+/vaayu
+ml/dataset
+
