@@ -34,10 +34,17 @@ class ModelArchitectureConfig(BaseModel):
     in_channels: int = 3
 
 
+from pathlib import Path
+
+ML_DIR = Path(__file__).resolve().parent.parent.parent
+MODELS_DIR = ML_DIR / "models"
+
+
 class CheckpointPathsConfig(BaseModel):
-    buildings: str = os.path.join("models", "buildings_unetpp_model.pth")
-    roads: str = os.path.join("models", "roads_unetpp_model.pth")
-    water_bodies: str = os.path.join("models", "water_bodies_unetpp_model.pth")
+    buildings: str = str(MODELS_DIR / "buildings_unetpp_model.pth")
+    roads: str = str(MODELS_DIR / "roads_unetpp_model.pth")
+    water_bodies: str = str(MODELS_DIR / "water_bodies_unetpp_model.pth")
+
 
 
 class ModelConfig(BaseModel):
