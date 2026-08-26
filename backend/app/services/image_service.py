@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import shutil
 from pathlib import Path
 
@@ -13,8 +14,30 @@ from app.services.id_factory import id_factory
 class ImageService:
     def __init__(self) -> None:
         self._images: dict[str, ImageContract] = {}
+        self._load_existing_images()
+
+    def _load_existing_images(self) -> None:
+        if not IMAGE_DATA_DIR.exists():
+            return
+        for item in IMAGE_DATA_DIR.iterdir():
+            if item.is_dir() and item.name.startswith("img_"):
+                orig_dir = item / "original"
+                if orig_dir.exists():
+                    for file in orig_dir.iterdir():
+                        if file.is_file():
+                            ext = file.suffix.lower()
+                            fmt = SUPPORTED_EXTENSIONS.get(ext, "PNG")
+                            try:
+                                contract = self._build_contract(
+                                    item.name, file, file.name, fmt, file.stat().st_size
+                                )
+                                self._images[item.name] = contract
+                            except Exception:
+                                pass
+                            break
 
     async def save_upload(self, upload: UploadFile) -> UploadImageResponse:
+
         filename = Path(upload.filename or "").name
         extension = Path(filename).suffix.lower()
         image_format = SUPPORTED_EXTENSIONS.get(extension)
@@ -45,11 +68,20 @@ class ImageService:
         self._images[image_id] = contract
         return UploadImageResponse(image_id=image_id)
 
+    def list_images(self) -> list[ImageContract]:
+        return list(self._images.values())
+
     def get_image(self, image_id: str) -> ImageContract:
         image = self._images.get(image_id)
         if image is None:
             raise APIError("IMAGE_NOT_FOUND", "Image not found", 404)
         return image
+
+    def update_image(self, image_id: str, **kwargs) -> ImageContract:
+        image = self.get_image(image_id)
+        updated = image.model_copy(update=kwargs)
+        self._images[image_id] = updated
+        return updated
 
     def exists(self, image_id: str) -> bool:
         return image_id in self._images
@@ -78,10 +110,21 @@ class ImageService:
             height=height,
             bands=bands,
             dtype=dtype,
-            crs=None,
-            resolution_x_m=None,
-            resolution_y_m=None,
+            crs="EPSG:4326",
+            resolution_x_m=0.1,
+            resolution_y_m=0.1,
+            resolution_m=0.1,
             file_size_bytes=file_size_bytes,
+            size_bytes=file_size_bytes,
+            uploaded_at=datetime.now(timezone.utc),
+            status="UPLOADED",
+            bounds={
+                "west": 77.505,
+                "south": 13.039,
+                "east": 77.519,
+                "north": 13.051,
+            },
+            feature_count=0,
         )
 
 

@@ -93,6 +93,30 @@ function FitSelected({ feature }: { feature?: Feature | null }) {
   return null;
 }
 
+function AutoFitFeatures({
+  features,
+  selected,
+}: {
+  features: Feature[];
+  selected?: Feature | null;
+}) {
+  const map = useMap();
+  useEffect(() => {
+    if (selected || !features || features.length === 0) return;
+    try {
+      const group = L.geoJSON(toFeatureCollection(features));
+      const b = group.getBounds();
+      if (b.isValid()) {
+        map.fitBounds(b.pad(0.25), { animate: true, maxZoom: 17 });
+      }
+    } catch {
+      // Ignore geometry errors
+    }
+  }, [features, selected, map]);
+  return null;
+}
+
+
 function ZoomWatcher({ onZoom }: { onZoom: (z: number) => void }) {
   const map = useMap();
   useEffect(() => {
@@ -208,19 +232,19 @@ export function GeoMap({
       <MapContainer
         center={AOI_CENTER}
         zoom={16}
-        minZoom={13}
+        minZoom={4}
         maxZoom={20}
         zoomControl={false}
         attributionControl
         className="h-full w-full"
-        maxBounds={AOI_BOUNDS}
-        maxBoundsViscosity={0.6}
       >
         <FixDefaultIcons />
         <MapApi apiRef={apiRef} />
         <CursorReadout onCursor={onCursor} />
+        <AutoFitFeatures features={features} selected={selected} />
         <FitSelected feature={selected} />
         <ScaleControl position="bottomleft" metric imperial={false} />
+
         <ZoomWatcher onZoom={onZoom} />
         <TileLayer
           url={layers.orthophoto || basemap !== "ortho" ? tileUrl : POSITRON}

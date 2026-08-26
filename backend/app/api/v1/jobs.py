@@ -15,6 +15,20 @@ async def create_job(request: CreateJobRequest, background_tasks: BackgroundTask
     return ok(job.model_dump(mode="json"))
 
 
+@router.get("")
+def list_jobs():
+    jobs = job_service.list_jobs()
+    return ok(
+        {
+            "items": [job.model_dump(mode="json") for job in jobs],
+            "total": len(jobs),
+            "page": 1,
+            "page_size": len(jobs) or 20,
+        },
+        meta={"total": len(jobs)},
+    )
+
+
 @router.get("/{job_id}")
 def get_job(job_id: str):
     job = job_service.get_job(job_id)
@@ -25,3 +39,11 @@ def get_job(job_id: str):
 def cancel_job(job_id: str):
     job = job_service.cancel_job(job_id)
     return ok(job.model_dump(mode="json"))
+
+
+@router.post("/{job_id}/retry")
+def retry_job(job_id: str, background_tasks: BackgroundTasks):
+    job = job_service.retry_job(job_id)
+    background_tasks.add_task(job_runner.run, job.job_id)
+    return ok(job.model_dump(mode="json"))
+

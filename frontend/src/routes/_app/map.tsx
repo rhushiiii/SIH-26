@@ -33,9 +33,19 @@ function MapExplorerPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/map" });
   const images = useImages();
-  const imageId = search.imageId ?? PRIMARY_IMAGE_ID;
+  const completedImages = (images.data?.items ?? []).filter((i) => i.status === "COMPLETED");
+  const fallbackImageId =
+    completedImages[0]?.image_id ??
+    images.data?.items?.[0]?.image_id ??
+    PRIMARY_IMAGE_ID;
+  const imageId =
+    search.imageId ??
+    (images.data?.items?.some((i) => i.image_id === PRIMARY_IMAGE_ID)
+      ? PRIMARY_IMAGE_ID
+      : fallbackImageId);
   const feats = useMapFeatures(imageId);
   const [selected, setSelected] = useState<Feature | null>(null);
+
 
   useEffect(() => {
     if (!search.featureId || !feats.data) return;

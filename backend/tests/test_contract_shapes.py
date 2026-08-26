@@ -114,3 +114,75 @@ def test_p3_feature_analytics_review_and_export_flow():
     fetched_export = client.get(f"/api/v1/exports/{export_body['data']['export_id']}")
     assert fetched_export.status_code == 200
     assert fetched_export.json()["data"]["image_id"] == image_id
+
+
+def test_cors_headers_allowed():
+    response = client.options(
+        "/api/v1/images",
+        headers={
+            "Origin": "http://localhost:8080",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "Content-Type",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == "http://localhost:8080"
+
+
+def test_phase3_new_endpoints():
+    buffer = BytesIO()
+    Image.new("RGB", (4, 3), color=(50, 100, 150)).save(buffer, format="PNG")
+    buffer.seek(0)
+
+    upload_response = client.post(
+        "/api/v1/images",
+        files={"file": ("survey_area.png", buffer, "image/png")},
+    )
+    assert upload_response.status_code == 200
+    image_id = upload_response.json()["data"]["image_id"]
+
+    # 1. Test GET /api/v1/images
+    images_res = client.get("/api/v1/images")
+    assert images_res.status_code == 200
+    images_data = images_res.json()["data"]
+    assert "items" in images_data
+    assert images_data["total"] >= 1
+    assert any(img["image_id"] == image_id for img in images_data["items"])
+
+    # 2. Test create job and GET /api/v1/jobs
+    job_res = client.post("/api/v1/jobs", json={"image_id": image_id})
+    assert job_res.status_code == 200
+    job_id = job_res.json()["data"]["job_id"]
+
+    jobs_res = client.get("/api/v1/jobs")
+    assert jobs_res.status_code == 200
+    jobs_data = jobs_res.json()["data"]
+    assert "items" in jobs_data
+    assert any(j["job_id"] == job_id for j in jobs_data["items"])
+
+    # 3. Test POST /api/v1/jobs/{job_id}/retry
+    retry_res = client.post(f"/api/v1/jobs/{job_id}/retry")
+    assert retry_res.status_code == 200
+    assert retry_res.json()["data"]["job_id"] == job_id
+
+    # 4. Test GET /api/v1/exports
+    client.post(
+        f"/api/v1/images/{image_id}/exports",
+        json={"format": "GEOJSON", "layers": ["BUILDING", "ROAD"]},
+    )
+    exports_res = client.get("/api/v1/exports")
+    assert exports_res.status_code == 200
+    exports_data = exports_res.json()["data"]
+    assert "items" in exports_data
+    assert exports_data["total"] >= 1
+
+    # 5. Test GET /api/v1/dashboard
+    dash_res = client.get("/api/v1/dashboard")
+    assert dash_res.status_code == 200
+    dash_data = dash_res.json()["data"]
+    assert "total_images" in dash_data
+    assert "total_jobs" in dash_data
+    assert "total_features" in dash_data
+    assert dash_data["total_images"] >= 1
+
+

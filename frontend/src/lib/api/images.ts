@@ -23,7 +23,11 @@ export const imagesApi = {
       const items = getMockState().images;
       return { items, total: items.length, page: 1, page_size: items.length };
     }
-    return apiRequest(endpoints.images.list);
+    const raw = await apiRequest<Paginated<ImageRecord> | ImageRecord[]>(endpoints.images.list);
+    if (Array.isArray(raw)) {
+      return { items: raw, total: raw.length, page: 1, page_size: raw.length || 20 };
+    }
+    return raw;
   },
 
   async get(imageId: string): Promise<ImageRecord> {
@@ -68,8 +72,13 @@ export const imagesApi = {
     }
     const body = new FormData();
     body.append("file", file);
-    return apiRequest(endpoints.images.create, { method: "POST", body });
+    const res = await apiRequest<any>(endpoints.images.create, { method: "POST", body });
+    if (res && res.image_id && !res.filename) {
+      return this.get(res.image_id);
+    }
+    return res;
   },
+
 
   async startProcessing(imageId: string): Promise<{ job_id: string }> {
     if (isMockEnabled()) {

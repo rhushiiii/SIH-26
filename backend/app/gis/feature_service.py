@@ -39,7 +39,7 @@ class FeatureService:
                     feature_id=f"building_{image_id[-6:]}_001",
                     image_id=image_id,
                     feature_type=FeatureType.BUILDING,
-                    geometry=rectangle(72.8791, 19.1241, 72.8795, 19.1245),
+                    geometry=rectangle(77.5110, 13.0440, 77.5125, 13.0452),
                     properties=FeatureProperties(
                         area_m2=143.72,
                         perimeter_m=49.13,
@@ -52,7 +52,7 @@ class FeatureService:
                     feature_id=f"road_{image_id[-6:]}_001",
                     image_id=image_id,
                     feature_type=FeatureType.ROAD,
-                    geometry=rectangle(72.8788, 19.1238, 72.8801, 19.1240),
+                    geometry=rectangle(77.5090, 13.0430, 77.5150, 13.0436),
                     properties=FeatureProperties(
                         area_m2=1210.5,
                         perimeter_m=None,
@@ -66,7 +66,7 @@ class FeatureService:
                     feature_id=f"waterbody_{image_id[-6:]}_001",
                     image_id=image_id,
                     feature_type=FeatureType.WATERBODY,
-                    geometry=rectangle(72.8802, 19.1246, 72.8808, 19.1251),
+                    geometry=rectangle(77.5160, 13.0460, 77.5185, 13.0485),
                     properties=FeatureProperties(
                         area_m2=5320.4,
                         perimeter_m=312.1,
@@ -77,6 +77,7 @@ class FeatureService:
                 ),
             ],
         )
+
 
 
 def rectangle(min_lon: float, min_lat: float, max_lon: float, max_lat: float) -> dict:

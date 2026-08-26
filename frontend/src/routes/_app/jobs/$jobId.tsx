@@ -55,8 +55,9 @@ function JobDetailPage() {
                 Cancel
               </Button>
             ) : null}
-            {job.status === "FAILED" && job.retry_supported ? (
+            {(job.status === "FAILED" || job.status === "CANCELLED") && job.retry_supported ? (
               <Button
+
                 disabled={retry.isPending}
                 onClick={() =>
                   retry.mutate(job.job_id, {

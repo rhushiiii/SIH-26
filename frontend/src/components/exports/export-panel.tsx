@@ -28,9 +28,15 @@ export function ExportPanel({
   }) => void;
 }) {
   const completed = images.filter((i) => i.status === "COMPLETED");
-  const [imageId, setImageId] = useState(completed[0]?.image_id ?? "");
+  const [selectedImageId, setSelectedImageId] = useState<string>("");
   const [format, setFormat] = useState<ExportFormat>("GeoJSON");
   const [layers, setLayers] = useState<FeatureType[]>([...LAYERS]);
+
+  const activeImageId =
+    selectedImageId ||
+    completed[0]?.image_id ||
+    images[0]?.image_id ||
+    "";
 
   const toggle = (layer: FeatureType) => {
     setLayers((prev) =>
@@ -38,16 +44,18 @@ export function ExportPanel({
     );
   };
 
+  const imageOptions = completed.length > 0 ? completed : images;
+
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="space-y-1.5">
         <Label>Image</Label>
-        <Select value={imageId} onValueChange={setImageId}>
+        <Select value={activeImageId} onValueChange={setSelectedImageId}>
           <SelectTrigger>
             <SelectValue placeholder="Select image" />
           </SelectTrigger>
           <SelectContent>
-            {completed.map((img) => (
+            {imageOptions.map((img) => (
               <SelectItem key={img.image_id} value={img.image_id}>
                 {img.filename}
               </SelectItem>
@@ -55,6 +63,7 @@ export function ExportPanel({
           </SelectContent>
         </Select>
       </div>
+
       <div className="space-y-1.5">
         <Label>Format</Label>
         <Select value={format} onValueChange={(v) => setFormat(v as ExportFormat)}>
@@ -83,8 +92,8 @@ export function ExportPanel({
       </fieldset>
       <div className="sm:col-span-2">
         <Button
-          disabled={!imageId || layers.length === 0 || pending}
-          onClick={() => onExport({ image_id: imageId, format, layers })}
+          disabled={!activeImageId || layers.length === 0 || pending}
+          onClick={() => onExport({ image_id: activeImageId, format, layers })}
         >
           <Download className="size-4" />
           Create export

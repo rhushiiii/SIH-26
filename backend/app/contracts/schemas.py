@@ -72,10 +72,18 @@ class ImageContract(BaseModel):
     height: int
     bands: int
     dtype: Optional[str] = None
-    crs: Optional[str] = None
+    crs: Optional[str] = "EPSG:4326"
     resolution_x_m: Optional[float] = None
     resolution_y_m: Optional[float] = None
+    resolution_m: Optional[float] = 0.1
     file_size_bytes: Optional[int] = None
+    size_bytes: Optional[int] = None
+    uploaded_at: Optional[datetime] = None
+    status: str = "UPLOADED"
+    bounds: Optional[dict[str, float]] = None
+    job_id: Optional[str] = None
+    feature_count: Optional[int] = 0
+    notes: Optional[str] = None
 
 
 class UploadImageResponse(BaseModel):
@@ -95,15 +103,19 @@ class JobError(BaseModel):
 class JobContract(BaseModel):
     job_id: str
     image_id: str
+    filename: Optional[str] = None
     status: JobStatus
     stage: Optional[str] = None
     progress: int = Field(ge=0, le=100)
+    stages: list[dict[str, Any]] = Field(default_factory=list)
     tiles_total: int = Field(default=0, ge=0)
     tiles_processed: int = Field(default=0, ge=0)
     created_at: datetime
+    updated_at: Optional[datetime] = None
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
     error: Optional[JobError] = None
+    retry_supported: bool = True
 
 
 class FeatureProperties(BaseModel):
@@ -139,18 +151,44 @@ class ReviewContract(BaseModel):
 
 
 class AnalyticsSummary(BaseModel):
-    building_count: int
-    building_area_m2: float
-    road_area_m2: float
-    waterbody_area_m2: float
-    average_building_area_m2: float
-    high_confidence_percentage: float
-    review_required_percentage: float
+    building_count: int = 0
+    building_area_m2: float = 0.0
+    road_area_m2: float = 0.0
+    waterbody_area_m2: float = 0.0
+    average_building_area_m2: float = 0.0
+    high_confidence_percentage: float = 0.0
+    review_required_percentage: float = 0.0
 
 
 class AnalyticsContract(BaseModel):
     image_id: str
-    summary: AnalyticsSummary
+    building_count: int = 0
+    road_count: int = 0
+    waterbody_count: int = 0
+    total_features: int = 0
+    built_up_area_m2: float = 0.0
+    road_area_m2: float = 0.0
+    road_length_m: float = 0.0
+    waterbody_area_m2: float = 0.0
+    average_building_area_m2: float = 0.0
+    high_confidence_pct: float = 0.0
+    medium_confidence_pct: float = 0.0
+    low_confidence_pct: float = 0.0
+    built_up_coverage_pct: float = 0.0
+    feature_count_by_type: list[dict[str, Any]] = Field(default_factory=list)
+    confidence_distribution: list[dict[str, Any]] = Field(default_factory=list)
+    features_over_time: list[dict[str, Any]] = Field(default_factory=list)
+    summary: Optional[AnalyticsSummary] = None
+
+
+class DashboardSummary(BaseModel):
+    total_images: int = 0
+    total_jobs: int = 0
+    total_features: int = 0
+    high_confidence_pct: float = 0.0
+    building_count: int = 0
+    road_length_km: float = 0.0
+    waterbody_count: int = 0
 
 
 class ExportRequest(BaseModel):
@@ -165,3 +203,9 @@ class ExportContract(BaseModel):
     layers: list[FeatureType]
     file_uri: str
     created_at: datetime
+    filename: Optional[str] = None
+    status: str = "COMPLETED"
+    completed_at: Optional[datetime] = None
+    download_url: Optional[str] = None
+    feature_count: Optional[int] = None
+

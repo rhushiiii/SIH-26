@@ -1,11 +1,14 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+
 
 from app.api.v1.router import router as api_v1_router
 from app.contracts.envelope import fail
-from app.core.config import API_PREFIX, EXPORT_DATA_DIR, IMAGE_DATA_DIR
+from app.core.config import API_PREFIX, CORS_ORIGINS, EXPORT_DATA_DIR, IMAGE_DATA_DIR
 from app.core.exceptions import APIError, api_error_handler
 from app.db.session import init_db
 
@@ -25,13 +28,23 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.add_exception_handler(APIError, api_error_handler)
 app.include_router(api_v1_router, prefix=API_PREFIX)
+app.mount("/exports", StaticFiles(directory=EXPORT_DATA_DIR), name="exports")
 
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
 
 
 @app.exception_handler(404)

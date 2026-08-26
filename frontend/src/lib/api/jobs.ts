@@ -28,8 +28,13 @@ export const jobsApi = {
       });
       return { items, total: items.length, page: 1, page_size: items.length };
     }
-    return apiRequest(endpoints.jobs.list);
+    const raw = await apiRequest<Paginated<Job> | Job[]>(endpoints.jobs.list);
+    if (Array.isArray(raw)) {
+      return { items: raw, total: raw.length, page: 1, page_size: raw.length || 20 };
+    }
+    return raw;
   },
+
 
   async get(jobId: string): Promise<Job> {
     if (isMockEnabled()) {

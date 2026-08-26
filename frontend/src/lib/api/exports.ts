@@ -16,8 +16,13 @@ export const exportsApi = {
       const items = getMockState().exports;
       return { items, total: items.length, page: 1, page_size: items.length };
     }
-    return apiRequest(endpoints.exports.list);
+    const raw = await apiRequest<Paginated<ExportRecord> | ExportRecord[]>(endpoints.exports.list);
+    if (Array.isArray(raw)) {
+      return { items: raw, total: raw.length, page: 1, page_size: raw.length || 20 };
+    }
+    return raw;
   },
+
 
   async get(exportId: string): Promise<ExportRecord> {
     if (isMockEnabled()) {

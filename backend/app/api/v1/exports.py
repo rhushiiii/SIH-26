@@ -15,7 +15,22 @@ def create_export(image_id: str, request: ExportRequest, db: Session = Depends(g
     return ok(export.model_dump(mode="json"))
 
 
+@router.get("/exports")
+def list_exports(db: Session = Depends(get_db)):
+    exports = export_service.list_exports(db)
+    return ok(
+        {
+            "items": [export.model_dump(mode="json") for export in exports],
+            "total": len(exports),
+            "page": 1,
+            "page_size": len(exports) or 20,
+        },
+        meta={"total": len(exports)},
+    )
+
+
 @router.get("/exports/{export_id}")
 def get_export(export_id: str, db: Session = Depends(get_db)):
     export = export_service.get_export(db, export_id)
     return ok(export.model_dump(mode="json"))
+

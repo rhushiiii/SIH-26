@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Download } from "lucide-react";
 import { toast } from "sonner";
 import { ExportPanel } from "@/components/exports/export-panel";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -7,6 +8,7 @@ import { LoadingState } from "@/components/shared/loading-state";
 import { PageHeader } from "@/components/shared/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getApiBaseUrl } from "@/lib/config";
 import { formatDateTime, formatNumber } from "@/lib/format";
 import { useCreateExport, useExports } from "@/hooks/use-exports";
 import { useImages } from "@/hooks/use-images";
@@ -19,6 +21,7 @@ function ExportsPage() {
   const images = useImages();
   const list = useExports();
   const create = useCreateExport();
+  const apiBase = getApiBaseUrl().replace(/\/api\/v1\/?$/, "");
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
@@ -67,12 +70,30 @@ function ExportsPage() {
               {list.data.items.map((row) => (
                 <tr key={row.export_id} className="border-t border-border">
                   <td className="px-4 py-3">
-                    <p className="font-medium text-navy">{row.filename}</p>
+                    {row.download_url && row.download_url !== "#" ? (
+                      <a
+                        href={
+                          row.download_url.startsWith("http")
+                            ? row.download_url
+                            : `${apiBase}${row.download_url}`
+                        }
+                        download={row.filename}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 font-medium text-navy hover:underline"
+                      >
+                        {row.filename}
+                        <Download className="size-3.5 text-muted-foreground" />
+                      </a>
+                    ) : (
+                      <p className="font-medium text-navy">{row.filename}</p>
+                    )}
                     <p className="font-mono text-[11px] text-muted-foreground">
                       {row.export_id}
                     </p>
                   </td>
                   <td className="px-4 py-3">{row.format}</td>
+
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
                       {row.layers.map((l) => (

@@ -19,3 +19,12 @@ SUPPORTED_EXTENSIONS = {
 }
 
 MAX_UPLOAD_BYTES = 750 * 1024 * 1024
+
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:8080,http://127.0.0.1:8080,http://localhost:3000,http://localhost:5173",
+    ).split(",")
+    if origin.strip()
+]

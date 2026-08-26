@@ -30,19 +30,33 @@ class ExportRepository:
         db.refresh(export)
         return self.to_contract(export)
 
+    def list_all(self, db: Session) -> list[ExportContract]:
+        from sqlalchemy import select
+        rows = db.execute(select(ExportModel)).scalars().all()
+        return [self.to_contract(row) for row in rows]
+
     def get(self, db: Session, export_id: str) -> ExportContract | None:
         export = db.get(ExportModel, export_id)
         return self.to_contract(export) if export else None
 
     def to_contract(self, export: ExportModel) -> ExportContract:
+        from pathlib import Path
+        layers = [FeatureType(layer) for layer in json.loads(export.layers_json)]
+        filename = Path(export.file_uri).name if export.file_uri else f"{export.export_id}.geojson"
         return ExportContract(
             export_id=export.export_id,
             image_id=export.image_id,
             format=ExportFormat(export.format),
-            layers=[FeatureType(layer) for layer in json.loads(export.layers_json)],
+            layers=layers,
             file_uri=export.file_uri,
             created_at=export.created_at,
+            filename=filename,
+            status="COMPLETED",
+            completed_at=export.created_at,
+            download_url=export.file_uri,
+            feature_count=None,
         )
 
 
 export_repository = ExportRepository()
+

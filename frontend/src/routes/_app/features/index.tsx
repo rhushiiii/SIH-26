@@ -26,7 +26,17 @@ export const Route = createFileRoute("/_app/features/")({
 
 function FeaturesPage() {
   const images = useImages();
-  const [imageId, setImageId] = useState(PRIMARY_IMAGE_ID);
+  const completedImages = (images.data?.items ?? []).filter((i) => i.status === "COMPLETED");
+  const fallbackImageId =
+    completedImages[0]?.image_id ??
+    images.data?.items?.[0]?.image_id ??
+    PRIMARY_IMAGE_ID;
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
+  const imageId =
+    selectedImageId ??
+    (images.data?.items?.some((i) => i.image_id === PRIMARY_IMAGE_ID)
+      ? PRIMARY_IMAGE_ID
+      : fallbackImageId);
   const [page, setPage] = useState(1);
   const [q, setQ] = useState("");
   const debounced = useDebounce(q);
@@ -44,6 +54,7 @@ function FeaturesPage() {
     ...filters,
   });
 
+
   const total = list.data?.total ?? 0;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -59,10 +70,11 @@ function FeaturesPage() {
           <Select
             value={imageId}
             onValueChange={(v) => {
-              setImageId(v);
+              setSelectedImageId(v);
               setPage(1);
             }}
           >
+
             <SelectTrigger aria-label="Image">
               <SelectValue />
             </SelectTrigger>

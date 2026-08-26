@@ -27,11 +27,15 @@ class ExportService:
         file_uri = f"/exports/{file_path.name}"
         return export_repository.create(db, image_id, request.format, request.layers, file_uri)
 
+    def list_exports(self, db) -> list[ExportContract]:
+        return export_repository.list_all(db)
+
     def get_export(self, db, export_id: str) -> ExportContract:
         export = export_repository.get(db, export_id)
         if export is None:
             raise APIError("EXPORT_FAILED", "Export not found", 404)
         return export
+
 
     def _write_geojson(self, image_id: str, features) -> Path:
         EXPORT_DATA_DIR.mkdir(parents=True, exist_ok=True)

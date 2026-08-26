@@ -40,7 +40,17 @@ const TYPE_COLORS = ["#F59E0B", "#F97316", "#06B6D4"];
 
 function AnalyticsPage() {
   const images = useImages();
-  const [imageId, setImageId] = useState(PRIMARY_IMAGE_ID);
+  const completedImages = (images.data?.items ?? []).filter((i) => i.status === "COMPLETED");
+  const fallbackImageId =
+    completedImages[0]?.image_id ??
+    images.data?.items?.[0]?.image_id ??
+    PRIMARY_IMAGE_ID;
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
+  const imageId =
+    selectedImageId ??
+    (images.data?.items?.some((i) => i.image_id === PRIMARY_IMAGE_ID)
+      ? PRIMARY_IMAGE_ID
+      : fallbackImageId);
   const q = useAnalytics(imageId);
 
   return (
@@ -50,22 +60,29 @@ function AnalyticsPage() {
         title="Analytics"
         description="Derived from polygonized GIS features — charts stay secondary to the map."
         actions={
-          <Select value={imageId} onValueChange={setImageId}>
+          <Select value={imageId} onValueChange={setSelectedImageId}>
             <SelectTrigger className="w-64" aria-label="Image">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {(images.data?.items ?? [])
-                .filter((i) => i.status === "COMPLETED")
-                .map((img) => (
+              {completedImages.length === 0 && images.data?.items?.length ? (
+                images.data.items.map((img) => (
                   <SelectItem key={img.image_id} value={img.image_id}>
                     {img.filename}
                   </SelectItem>
-                ))}
+                ))
+              ) : (
+                completedImages.map((img) => (
+                  <SelectItem key={img.image_id} value={img.image_id}>
+                    {img.filename}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
         }
       />
+
       {q.isLoading ? (
         <LoadingState />
       ) : q.isError || !q.data ? (

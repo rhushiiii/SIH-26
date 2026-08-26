@@ -44,10 +44,20 @@ export const featuresApi = {
     if (params.page) search.set("page", String(params.page));
     if (params.page_size) search.set("page_size", String(params.page_size));
     const qs = search.toString();
-    return apiRequest(
+    const raw = await apiRequest<Paginated<Feature> | Feature[]>(
       `${endpoints.images.features(imageId)}${qs ? `?${qs}` : ""}`,
     );
+    if (Array.isArray(raw)) {
+      return {
+        items: raw,
+        total: raw.length,
+        page: params.page ?? 1,
+        page_size: params.page_size ?? PAGE_SIZE,
+      };
+    }
+    return raw;
   },
+
 
   async listAll(imageId?: string): Promise<Feature[]> {
     if (isMockEnabled()) {

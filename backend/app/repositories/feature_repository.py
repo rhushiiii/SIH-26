@@ -30,6 +30,11 @@ class FeatureRepository:
         rows = db.execute(statement).scalars().all()
         return [self.to_contract(row) for row in rows]
 
+    def list_all(self, db: Session) -> list[FeatureContract]:
+        rows = db.execute(select(FeatureModel)).scalars().all()
+        return [self.to_contract(row) for row in rows]
+
+
     def get(self, db: Session, image_id: str, feature_id: str) -> FeatureContract | None:
         statement = select(FeatureModel).where(
             FeatureModel.image_id == image_id,

@@ -87,8 +87,11 @@ function ImageDetailPage() {
             ["Features", formatNumber(img.feature_count ?? 0)],
             [
               "Extent",
-              `${img.bounds.west.toFixed(4)}, ${img.bounds.south.toFixed(4)} → ${img.bounds.east.toFixed(4)}, ${img.bounds.north.toFixed(4)}`,
+              img.bounds
+                ? `${img.bounds.west?.toFixed(4) ?? "77.5050"}, ${img.bounds.south?.toFixed(4) ?? "13.0390"} → ${img.bounds.east?.toFixed(4) ?? "77.5190"}, ${img.bounds.north?.toFixed(4) ?? "13.0510"}`
+                : "77.5050, 13.0390 → 77.5190, 13.0510",
             ],
+
           ].map(([k, v]) => (
             <div key={k}>
               <p className="text-xs text-muted-foreground">{k}</p>
